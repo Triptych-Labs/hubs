@@ -106,14 +106,7 @@ export function SubmitEmail({ onSubmitEmail, initialEmail, privacyUrl, termsUrl,
           <FormattedMessage id="sign-in-modal.prompt" defaultMessage="Please Sign In" />
         )}
       </p>
-      <TextInputField
-        name="email"
-        type="email"
-        required
-        value={email}
-        onChange={onChangeEmail}
-        placeholder="example@example.com"
-      />
+      <TextInputField name="email" required value={email} onChange={onChangeEmail} placeholder="example@example.com" />
       <p>
         <small>
           <LegalMessage termsUrl={termsUrl} privacyUrl={privacyUrl} />
@@ -141,7 +134,7 @@ export function WaitForVerification({ email, onCancel, showNewsletterSignup }) {
     <Column center padding>
       <FormattedMessage
         id="sign-in-modal.wait-for-verification"
-        defaultMessage="<p>Email sent to {email}!</p><p>To continue, click on the link in the email using your phone, tablet, or PC.</p><p>No email? You may not be able to create an account.</p>"
+        defaultMessage="<p>Please sit tight while we set up somethings!</p>"
         // eslint-disable-next-line react/display-name
         values={{ email, p: chunks => <p>{chunks}</p> }}
       />

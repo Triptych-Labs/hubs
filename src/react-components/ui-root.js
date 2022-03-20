@@ -411,14 +411,12 @@ class UIRoot extends Component {
       step: SignInStep.submit,
       message: signInMessage,
       onSubmitEmail: async email => {
-        const { authComplete } = await authChannel.startAuthentication(email, this.props.hubChannel);
+        await authChannel.startAuthentication(email);
 
         this.showNonHistoriedDialog(RoomSignInModalContainer, {
           step: SignInStep.waitForVerification,
           onClose: onCallback
         });
-
-        await authComplete;
 
         this.setState({ signedIn: true });
         this.showNonHistoriedDialog(RoomSignInModalContainer, {

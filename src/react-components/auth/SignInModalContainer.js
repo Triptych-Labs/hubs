@@ -11,7 +11,8 @@ const SignInAction = {
 
 const initialSignInState = {
   step: SignInStep.submit,
-  email: ""
+  email: "",
+  authLink: ""
 };
 
 function loginReducer(state, action) {
@@ -19,7 +20,7 @@ function loginReducer(state, action) {
     case SignInAction.submitEmail:
       return { step: SignInStep.waitForVerification, email: action.email };
     case SignInAction.verificationReceived:
-      return { ...state, step: SignInStep.complete };
+      return { ...state, step: SignInStep.complete, authLink: action.authLink };
     case SignInAction.cancel:
       return { ...state, step: SignInStep.submit };
   }
@@ -31,8 +32,8 @@ function useSignIn() {
 
   const submitEmail = useCallback(
     email => {
-      auth.signIn(email).then(() => {
-        dispatch({ type: SignInAction.verificationReceived });
+      auth.signIn(email).then(authLink => {
+        dispatch({ type: SignInAction.verificationReceived, authLink });
       });
       dispatch({ type: SignInAction.submitEmail, email });
     },
@@ -46,6 +47,7 @@ function useSignIn() {
   return {
     step: state.step,
     email: state.email,
+    authLink: state.authLink,
     submitEmail,
     cancel
   };
@@ -53,16 +55,14 @@ function useSignIn() {
 
 export function SignInModalContainer() {
   const qs = new URLSearchParams(location.search);
-  const { step, submitEmail, cancel, email } = useSignIn();
-  const redirectUrl = qs.get("sign_in_destination_url") || "/";
+  const { step, submitEmail, cancel, email, authLink } = useSignIn();
+  // const redirectUrl = qs.get("sign_in_destination_url") || "/";
 
   useEffect(
     () => {
-      if (step === SignInStep.complete) {
-        window.location = redirectUrl;
-      }
+      if (authLink) window.location = authLink;
     },
-    [step, redirectUrl]
+    [authLink]
   );
 
   return (

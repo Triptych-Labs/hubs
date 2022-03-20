@@ -55,6 +55,7 @@ export function StorybookAuthContextProvider({ children }) {
     isAdmin: true,
     token: "abc123",
     email: "foo@bar.baz",
+    authLink: "sdfasd",
     userId: "00000000",
     signIn: noop,
     verify: noop,
@@ -74,9 +75,8 @@ export function AuthContextProvider({ children, store }) {
       const authChannel = new AuthChannel(store);
       const socket = await connectToReticulum();
       authChannel.setSocket(socket);
-      const { authComplete } = await authChannel.startAuthentication(email);
-      await authComplete;
-      await checkIsAdmin(socket, store);
+      await authChannel.startAuthentication(email);
+      return authChannel.authLink;
     },
     [store]
   );
@@ -106,6 +106,7 @@ export function AuthContextProvider({ children, store }) {
     isAdmin: configs.isAdmin(),
     email: store.state.credentials && store.state.credentials.email,
     userId: store.credentialsAccountId,
+    authLink: store.state.credentials && store.state.credentials.authLink,
     signIn,
     verify,
     signOut
@@ -120,6 +121,7 @@ export function AuthContextProvider({ children, store }) {
           isSignedIn: !!store.state.credentials && !!store.state.credentials.token,
           isAdmin: configs.isAdmin(),
           email: store.state.credentials && store.state.credentials.email,
+          authLink: store.state.credentials && store.state.credentials.authLink,
           userId: store.credentialsAccountId
         }));
       };

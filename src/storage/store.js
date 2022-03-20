@@ -56,7 +56,8 @@ export const SCHEMA = {
       additionalProperties: false,
       properties: {
         token: { type: ["null", "string"] },
-        email: { type: ["null", "string"] }
+        email: { type: ["null", "string"] },
+        authLink: { type: ["null", "string"] }
       }
     },
 

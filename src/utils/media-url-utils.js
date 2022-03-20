@@ -78,17 +78,7 @@ export const isNonCorsProxyDomain = hostname => {
 };
 
 export const proxiedUrlFor = url => {
-  if (!(url.startsWith("http:") || url.startsWith("https:"))) return url;
-
-  // Skip known domains that do not require CORS proxying.
-  try {
-    const parsedUrl = new URL(url);
-    if (isNonCorsProxyDomain(parsedUrl.hostname)) return url;
-  } catch (e) {
-    // Ignore
-  }
-
-  return `https://${configs.CORS_PROXY_SERVER}/${url}`;
+  return url;
 };
 
 export function getAbsoluteUrl(baseUrl, relativeUrl) {
@@ -133,7 +123,7 @@ export const getCustomGLTFParserURLResolver = gltfUrl => url => {
 
   if (configs.CORS_PROXY_SERVER) {
     // For absolute paths with a CORS proxied gltf URL, re-write the url properly to be proxied
-    const corsProxyPrefix = `https://${configs.CORS_PROXY_SERVER}/`;
+    const corsProxyPrefix = ``;
 
     if (gltfUrl.startsWith(corsProxyPrefix)) {
       const originalUrl = decodeURIComponent(gltfUrl.substring(corsProxyPrefix.length));

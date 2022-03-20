@@ -1,7 +1,7 @@
 [general]
 shortlink_domain = "hub.link"
 reticulum_server = "dev.reticulum.io"
-cors_proxy_server = "cors-proxy-dev.reticulum.io"
+cors_proxy_server = ""
 thumbnail_server = "nearspark-dev.reticulum.io"
 non_cors_proxy_domains = "hubs.local,dev.reticulum.io"
 postgrest_server = "https://hubs.local:3000"

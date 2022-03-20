@@ -5,6 +5,7 @@ export default class AuthChannel {
     this.store = store;
     this.socket = null;
     this._signedIn = !!this.store.state.credentials.token;
+    this._authLink = null;
   }
 
   setSocket = socket => {
@@ -13,6 +14,10 @@ export default class AuthChannel {
 
   get email() {
     return this.store.state.credentials.email;
+  }
+
+  get authLink() {
+    return this._authLink;
   }
 
   get signedIn() {
@@ -50,7 +55,7 @@ export default class AuthChannel {
     });
   }
 
-  async startAuthentication(email, hubChannel) {
+  async startAuthentication(email) {
     const channel = this.socket.channel(`auth:${uuid()}`);
     await new Promise((resolve, reject) =>
       channel
@@ -59,18 +64,21 @@ export default class AuthChannel {
         .receive("error", reject)
     );
 
-    const authComplete = new Promise(resolve =>
-      channel.on("auth_credentials", async ({ credentials: token }) => {
-        await this.handleAuthCredentials(email, token, hubChannel);
+    // wait for auth link from phoenix since we do not use email but wish for users to confirm
+    // registration by two-step generate -then-> affirm registration.
+    const authLink = new Promise(resolve =>
+      channel.on("auth_link", async ({ link }) => {
+        await this.handleAuthLink(link);
         resolve();
       })
     );
-
     channel.push("auth_request", { email, origin: "hubs" });
+    await authLink;
+  }
 
-    // Returning an object with the authComplete promise since we want the caller to wait for the above await but not
-    // for authComplete.
-    return { authComplete };
+  async handleAuthLink(authLink) {
+    this.store.update({ credentials: { authLink } });
+    this._authLink = authLink;
   }
 
   async handleAuthCredentials(email, token, hubChannel) {
