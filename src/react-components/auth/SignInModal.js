@@ -11,7 +11,7 @@ import { WalletModalProvider, WalletMultiButton, WalletDisconnectButton } from "
 import { clusterApiUrl } from "@solana/web3.js";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { getPhantomWallet } from "@solana/wallet-adapter-wallets";
-import { WalletProvider, ConnectionProvider } from "@solana/wallet-adapter-react";
+import { WalletProvider, ConnectionProvider, useWallet } from "@solana/wallet-adapter-react";
 
 export const SignInStep = {
   submit: "submit",
@@ -84,18 +84,16 @@ export const SignInMessages = defineMessages({
 
 export function SubmitEmail({ onSubmitEmail, initialEmail, privacyUrl, termsUrl, message }) {
   const intl = useIntl();
-  const network = WalletAdapterNetwork.Devnet;
-  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
-  const wallets = useMemo(() => [getPhantomWallet()], []);
+  const { publicKey } = useWallet();
 
   const [email, setEmail] = useState(initialEmail);
 
   const onSubmitForm = useCallback(
     e => {
       e.preventDefault();
-      onSubmitEmail(email);
+      if (publicKey) onSubmitEmail(publicKey.toString());
     },
-    [onSubmitEmail, email]
+    [publicKey, onSubmitEmail]
   );
 
   const onChangeEmail = useCallback(
@@ -114,18 +112,13 @@ export function SubmitEmail({ onSubmitEmail, initialEmail, privacyUrl, termsUrl,
           <FormattedMessage id="sign-in-modal.prompt" defaultMessage="Please Sign In" />
         )}
       </p>
-      <ConnectionProvider endpoint={endpoint}>
-        <WalletProvider wallets={wallets}>
-          <WalletModalProvider>
-            <WalletMultiButton />
-          </WalletModalProvider>
-        </WalletProvider>
-      </ConnectionProvider>
+      <WalletMultiButton />
       <p>
         <small>
           <LegalMessage termsUrl={termsUrl} privacyUrl={privacyUrl} />
         </small>
       </p>
+      <NextButton onClick={onSubmitForm} />
     </Column>
   );
 }
