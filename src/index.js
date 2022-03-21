@@ -9,29 +9,17 @@ import { AuthContextProvider } from "./react-components/auth/AuthContext";
 import "./react-components/styles/global.scss";
 import { ThemeProvider } from "./react-components/styles/theme";
 
-import { clusterApiUrl } from "@solana/web3.js";
-import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
-import { getPhantomWallet } from "@solana/wallet-adapter-wallets";
-import { WalletProvider, ConnectionProvider } from "@solana/wallet-adapter-react";
-
 registerTelemetry("/home", "Hubs Home Page");
 
 const store = new Store();
 window.APP = { store };
 
 function Root() {
-  const network = WalletAdapterNetwork.Devnet;
-  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
-  const wallets = useMemo(() => [getPhantomWallet()], []);
   return (
     <WrappedIntlProvider>
       <ThemeProvider store={store}>
         <AuthContextProvider store={store}>
-          <ConnectionProvider endpoint={endpoint}>
-            <WalletProvider wallets={wallets}>
-              <HomePage />
-            </WalletProvider>
-          </ConnectionProvider>
+          <HomePage />
         </AuthContextProvider>
       </ThemeProvider>
     </WrappedIntlProvider>

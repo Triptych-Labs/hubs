@@ -56,7 +56,6 @@ function useSignIn() {
 export function SignInModalContainer() {
   const qs = new URLSearchParams(location.search);
   const { step, submitEmail, cancel, email, authLink } = useSignIn();
-  // const redirectUrl = qs.get("sign_in_destination_url") || "/";
 
   useEffect(
     () => {

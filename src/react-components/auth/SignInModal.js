@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useMemo, useCallback, useState } from "react";
 import PropTypes from "prop-types";
 import { CloseButton } from "../input/CloseButton";
 import { Modal } from "../modal/Modal";
@@ -7,6 +7,11 @@ import { CancelButton, NextButton, ContinueButton } from "../input/Button";
 import { TextInputField } from "../input/TextInputField";
 import { Column } from "../layout/Column";
 import { LegalMessage } from "./LegalMessage";
+import { WalletModalProvider, WalletMultiButton, WalletDisconnectButton } from "@solana/wallet-adapter-react-ui";
+import { clusterApiUrl } from "@solana/web3.js";
+import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
+import { getPhantomWallet } from "@solana/wallet-adapter-wallets";
+import { WalletProvider, ConnectionProvider } from "@solana/wallet-adapter-react";
 
 export const SignInStep = {
   submit: "submit",
@@ -79,6 +84,9 @@ export const SignInMessages = defineMessages({
 
 export function SubmitEmail({ onSubmitEmail, initialEmail, privacyUrl, termsUrl, message }) {
   const intl = useIntl();
+  const network = WalletAdapterNetwork.Devnet;
+  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+  const wallets = useMemo(() => [getPhantomWallet()], []);
 
   const [email, setEmail] = useState(initialEmail);
 
@@ -98,7 +106,7 @@ export function SubmitEmail({ onSubmitEmail, initialEmail, privacyUrl, termsUrl,
   );
 
   return (
-    <Column center padding as="form" onSubmit={onSubmitForm}>
+    <Column center padding>
       <p>
         {message ? (
           intl.formatMessage(message)
@@ -106,13 +114,18 @@ export function SubmitEmail({ onSubmitEmail, initialEmail, privacyUrl, termsUrl,
           <FormattedMessage id="sign-in-modal.prompt" defaultMessage="Please Sign In" />
         )}
       </p>
-      <TextInputField name="email" required value={email} onChange={onChangeEmail} placeholder="example@example.com" />
+      <ConnectionProvider endpoint={endpoint}>
+        <WalletProvider wallets={wallets}>
+          <WalletModalProvider>
+            <WalletMultiButton />
+          </WalletModalProvider>
+        </WalletProvider>
+      </ConnectionProvider>
       <p>
         <small>
           <LegalMessage termsUrl={termsUrl} privacyUrl={privacyUrl} />
         </small>
       </p>
-      <NextButton type="submit" />
     </Column>
   );
 }
