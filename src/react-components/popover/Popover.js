@@ -62,7 +62,7 @@ export function Popover({
       { name: "offset", options: { offset: [offsetSkidding, offsetDistance] } } // https://popper.js.org/docs/v2/modifiers/offset/
     ]
   });
-  const breakpoint = useCssBreakpoints();
+  const breakpoint = "md";
   const fullscreen = !disableFullscreen && (breakpoint === "sm" || breakpoint === "md");
   const openPopover = useCallback(() => setVisible(true), [setVisible]);
   const closePopover = useCallback(() => setVisible(false), [setVisible]);

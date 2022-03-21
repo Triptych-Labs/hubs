@@ -42,7 +42,6 @@ import { LoadingScreenContainer } from "./room/LoadingScreenContainer";
 
 import { RoomLayoutContainer } from "./room/RoomLayoutContainer";
 import roomLayoutStyles from "./layout/RoomLayout.scss";
-import { useAccessibleOutlineStyle } from "./input/useAccessibleOutlineStyle";
 import { ToolbarButton } from "./input/ToolbarButton";
 import { RoomEntryModal } from "./room/RoomEntryModal";
 import { EnterOnDeviceModal } from "./room/EnterOnDeviceModal";
@@ -73,7 +72,6 @@ import { PeopleSidebarContainer, userFromPresence } from "./room/PeopleSidebarCo
 import { ObjectListProvider } from "./room/useObjectList";
 import { ObjectsSidebarContainer } from "./room/ObjectsSidebarContainer";
 import { ObjectMenuContainer } from "./room/ObjectMenuContainer";
-import { useCssBreakpoints } from "react-use-css-breakpoints";
 import { PlacePopoverContainer } from "./room/PlacePopoverContainer";
 import { SharePopoverContainer } from "./room/SharePopoverContainer";
 import { AudioPopoverContainer } from "./room/AudioPopoverContainer";
@@ -1185,13 +1183,12 @@ class UIRoot extends Component {
             icon: HomeIcon,
             onClick: () => this.setSidebar("room-info")
           },
-          (this.props.breakpoint === "sm" || this.props.breakpoint === "md") &&
-            (this.props.hub.entry_mode !== "invite" || this.props.hubChannel.can("update_hub")) && {
-              id: "invite",
-              label: <FormattedMessage id="more-menu.invite" defaultMessage="Invite" />,
-              icon: InviteIcon,
-              onClick: () => this.props.scene.emit("action_invite")
-            },
+          (this.props.hub.entry_mode !== "invite" || this.props.hubChannel.can("update_hub")) && {
+            id: "invite",
+            label: <FormattedMessage id="more-menu.invite" defaultMessage="Invite" />,
+            icon: InviteIcon,
+            onClick: () => this.props.scene.emit("action_invite")
+          },
           this.isFavorited()
             ? {
                 id: "unfavorite-room",
@@ -1538,13 +1535,7 @@ class UIRoot extends Component {
                   )
                 }
                 modal={this.state.dialog}
-                toolbarLeft={
-                  <InvitePopoverContainer
-                    hub={this.props.hub}
-                    hubChannel={this.props.hubChannel}
-                    scene={this.props.scene}
-                  />
-                }
+                toolbarLeft={<div />}
                 toolbarCenter={
                   <>
                     {watching && (
@@ -1565,6 +1556,7 @@ class UIRoot extends Component {
                             onClick={() => this.props.scene.enterVR()}
                           />
                         )}
+                        <MoreMenuPopoverButton menu={moreMenu} />
                       </>
                     )}
                     {entered && (
@@ -1617,7 +1609,6 @@ class UIRoot extends Component {
                         }}
                       />
                     )}
-                    <MoreMenuPopoverButton menu={moreMenu} />
                   </>
                 }
               />
@@ -1630,9 +1621,7 @@ class UIRoot extends Component {
 }
 
 function UIRootHooksWrapper(props) {
-  useAccessibleOutlineStyle();
-  const breakpoint = useCssBreakpoints();
-
+  const breakpoint = "md";
   useEffect(
     () => {
       const el = document.getElementById("preload-overlay");

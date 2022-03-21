@@ -10,7 +10,6 @@ import { ReactComponent as SettingsIcon } from "../icons/Settings.svg";
 import { ReactComponent as HmcLogo } from "../icons/HmcLogo.svg";
 import styles from "./RoomEntryModal.scss";
 import styleUtils from "../styles/style-utils.scss";
-import { useCssBreakpoints } from "react-use-css-breakpoints";
 import { Column } from "../layout/Column";
 import { FormattedMessage } from "react-intl";
 import configs from "../../utils/configs";
@@ -30,7 +29,7 @@ export function RoomEntryModal({
   onOptions,
   ...rest
 }) {
-  const breakpoint = useCssBreakpoints();
+  const breakpoint = "md";
   const isHmc = configs.feature("show_cloud");
   return (
     <Modal className={classNames(styles.roomEntryModal, className)} disableFullscreen {...rest}>
