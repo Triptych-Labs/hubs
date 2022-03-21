@@ -26,7 +26,7 @@ function createHTTPSConfig() {
       [
         {
           name: "commonName",
-          value: "localhost"
+          value: "hubs.triptychlabs.io"
         }
       ],
       {
@@ -43,7 +43,7 @@ function createHTTPSConfig() {
               },
               {
                 type: 2,
-                value: "hubs.local"
+                value: "hubs.triptychlabs.io"
               }
             ]
           }
@@ -179,13 +179,13 @@ async function fetchAppConfigAndEnvironmentVars() {
 
   const { shortlink_domain, thumbnail_server } = hubsConfigs.general;
 
-  const localIp = process.env.HOST_IP || (await internalIp.v4()) || "localhost";
+  const localIp = process.env.HOST_IP || (await internalIp.v4()) || "0.0.0.0";
 
   process.env.RETICULUM_SERVER = host;
   process.env.SHORTLINK_DOMAIN = shortlink_domain;
   process.env.CORS_PROXY_SERVER = `${localIp}:8080/cors-proxy`;
   process.env.THUMBNAIL_SERVER = thumbnail_server;
-  process.env.NON_CORS_PROXY_DOMAINS = `${localIp},hubs.local,localhost`;
+  process.env.NON_CORS_PROXY_DOMAINS = `${localIp},hubs.triptychlabs.io,localhost`;
 
   return appConfig;
 }
@@ -197,7 +197,7 @@ module.exports = async (env, argv) => {
   // .env takes precedent over .defaults.env
   // Previously defined environment variables are not overwritten
   dotenv.config({ path: ".env" });
-  dotenv.config({ path: ".defaults.env" });
+  // dotenv.config({ path: ".defaults.env" });
 
   let appConfig = undefined;
 
@@ -210,7 +210,8 @@ module.exports = async (env, argv) => {
       if (!env.localDev) {
         // Load and set the app config and environment variables from the remote server.
         // A Hubs Cloud server or dev.reticulum.io can be used.
-        appConfig = await fetchAppConfigAndEnvironmentVars();
+        // appConfig = await fetchAppConfigAndEnvironmentVars();
+        appConfig = createDefaultAppConfig();
       }
     } else {
       if (!env.localDev) {
@@ -220,17 +221,18 @@ module.exports = async (env, argv) => {
     }
 
     if (env.localDev) {
+      console.log("...........");
       // Local Dev Environment (npm run local)
       Object.assign(process.env, {
-        HOST: "hubs.local",
-        RETICULUM_SOCKET_SERVER: "hubs.local",
-        CORS_PROXY_SERVER: "hubs-proxy.local:4000",
-        NON_CORS_PROXY_DOMAINS: "hubs.local,dev.reticulum.io",
-        BASE_ASSETS_PATH: "https://hubs.local:8080/",
-        RETICULUM_SERVER: "hubs.local:4000",
+        HOST: "hubs.triptychlabs.io",
+        RETICULUM_SOCKET_SERVER: "hubs.triptychlabs.io:4000",
+        CORS_PROXY_SERVER: "",
+        NON_CORS_PROXY_DOMAINS: "hubs.triptychlabs.io,dev.reticulum.io",
+        BASE_ASSETS_PATH: "https://hubs.triptychlabs.io:8080/",
+        RETICULUM_SERVER: "hubs.triptychlabs.io:4000",
         POSTGREST_SERVER: "",
         ITA_SERVER: "",
-        UPLOADS_HOST: "https://hubs.local:4000"
+        UPLOADS_HOST: "https://hubs.triptychlabs.io:4000"
       });
     }
   }
@@ -238,7 +240,7 @@ module.exports = async (env, argv) => {
   // In production, the environment variables are defined in CI or loaded from ita and
   // the app config is injected into the head of the page by Reticulum.
 
-  const host = process.env.HOST_IP || env.localDev || env.remoteDev ? "hubs.local" : "localhost";
+  const host = process.env.HOST_IP || env.localDev || env.remoteDev ? "0.0.0.0" : "0.0.0.0";
 
   const liveReload = !!process.env.LIVE_RELOAD || false;
 
@@ -288,15 +290,17 @@ module.exports = async (env, argv) => {
     },
     output: {
       filename: "assets/js/[name]-[chunkhash].js",
-      publicPath: process.env.BASE_ASSETS_PATH || ""
+      publicPath: "https://hubs.triptychlabs.io:8080/"
     },
     devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
     devServer: {
       https: createHTTPSConfig(),
+      port: 8080,
       host: "0.0.0.0",
       public: `${host}:8080`,
-      useLocalIp: true,
-      allowedHosts: [host, "hubs.local"],
+      useLocalIp: false,
+      publicPath: "https://hubs.triptychlabs.io:8080/",
+      allowedHosts: [host, "hubs.triptychlabs.io"],
       headers: devServerHeaders,
       hot: liveReload,
       inline: liveReload,
@@ -326,7 +330,7 @@ module.exports = async (env, argv) => {
           const redirectLocation = req.header("location");
 
           if (redirectLocation) {
-            res.header("Location", "https://localhost:8080/cors-proxy/" + redirectLocation);
+            res.header("Location", "https://hubs.triptychlabs.io:8080/cors-proxy/" + redirectLocation);
           }
 
           if (req.method === "OPTIONS") {
@@ -379,6 +383,11 @@ module.exports = async (env, argv) => {
             publicPath: "/",
             inline: true
           }
+        },
+        {
+          test: /\.mjs$/,
+          include: /node_modules/,
+          type: "javascript/auto"
         },
         {
           test: [
@@ -543,6 +552,9 @@ module.exports = async (env, argv) => {
       }
     },
     plugins: [
+      new webpack.ProvidePlugin({
+        Buffer: ["buffer", "Buffer"]
+      }),
       new BundleAnalyzerPlugin({
         analyzerMode: env && env.bundleAnalyzer ? "server" : "disabled"
       }),
@@ -677,7 +689,7 @@ module.exports = async (env, argv) => {
           GA_TRACKING_ID: process.env.GA_TRACKING_ID,
           POSTGREST_SERVER: process.env.POSTGREST_SERVER,
           UPLOADS_HOST: process.env.UPLOADS_HOST,
-          BASE_ASSETS_PATH: process.env.BASE_ASSETS_PATH,
+          BASE_ASSETS_PATH: "https://hubs.triptychlabs.io:8080/",
           APP_CONFIG: appConfig
         })
       })
